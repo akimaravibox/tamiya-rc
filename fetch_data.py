@@ -1,6 +1,7 @@
 """
 타미야 RC카 대회 신청정보 조회 → data.json 저장
 GitHub Actions 에서 자동 실행됨
+- 오늘 날짜만 조회 후 기존 data.json 에 추가/갱신
 """
 
 import requests
@@ -8,11 +9,10 @@ from bs4 import BeautifulSoup
 from datetime import date
 import json
 import time
-import sys
+import os
 
 # ── 설정 ──────────────────────────────────────────────
-START_DATE  = date(2026, 3, 21)   # ← 대회 시작일
-END_DATE    = date.today()    # ← 대회 종료일
+START_DATE  = date(2026, 3, 21)   # ← 대회 시작일 (고정)
 MAX_INDEX   = 50
 EMPTY_LIMIT = 20
 DELAY_SEC   = 0
@@ -65,72 +65,100 @@ def lookup(receipt_no: str):
                 return None
 
             return {
-                "접수번호":  receipt_no,
-                "참가자명":  data.get("참가자명", ""),
+                "접수번호":   receipt_no,
+                "참가자명":   data.get("참가자명", ""),
                 "참가클래스": data.get("참가클래스", ""),
             }
         except Exception as e:
             wait = 3 * attempt
-            print(f"  [재시도 {attempt}/{MAX_RETRY}] {receipt_no} → {wait}초 대기: {e}")
+            print(f"  [재시도 {attempt}/{MAX_RETRY}] {receipt_no} → {wait}초 대기: {e}", flush=True)
             time.sleep(wait)
 
     return None
 
 
+def load_existing() -> dict:
+    """기존 data.json 로드. 없으면 빈 구조 반환"""
+    if os.path.exists(OUTPUT_FILE):
+        with open(OUTPUT_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {
+        "updated_at":   date.today().isoformat(),
+        "total":        0,
+        "start_date":   START_DATE.isoformat(),
+        "end_date":     date.today().isoformat(),
+        "class_count":  {},
+        "participants": [],
+    }
+
+
 def main():
-    results      = []
-    total        = 0
-    current      = START_DATE
+    today = date.today()
 
-    print(f"조회 기간: {START_DATE} ~ {END_DATE}")
+    # 대회 시작 전이면 조회 불필요
+    if today < START_DATE:
+        print(f"대회 시작 전입니다. (시작일: {START_DATE})")
+        return
 
-    while current <= END_DATE:
-        print(f"\n[{current}] 조회 중...")
-        empty_count = 0
+    print(f"오늘 날짜 조회: {today}", flush=True)
 
-        for idx in range(1, MAX_INDEX + 1):
-            rno  = make_receipt_no(current, idx)
-            info = lookup(rno)
-            total += 1
+    # ── 기존 data.json 로드 ──────────────────────────────
+    existing = load_existing()
 
-            if info:
-                empty_count = 0
-                print(f"  ✔ {rno}  {info['참가자명']}  {info['참가클래스']}")
-                results.append(info)
-            else:
-                empty_count += 1
-                if empty_count >= EMPTY_LIMIT:
-                    print(f"  연속 빈 결과 {EMPTY_LIMIT}건 → 다음 날짜")
-                    break
+    # 기존 참가자를 접수번호 기준으로 딕셔너리화 (중복 방지)
+    participants_map = {
+        p["접수번호"]: p for p in existing.get("participants", [])
+    }
 
-            time.sleep(DELAY_SEC)
+    # ── 오늘 날짜만 조회 ─────────────────────────────────
+    new_count   = 0
+    empty_count = 0
 
-        from datetime import timedelta
-        current += timedelta(days=1)
+    for idx in range(1, MAX_INDEX + 1):
+        rno  = make_receipt_no(today, idx)
+        info = lookup(rno)
 
-    # 클래스별 정렬
-    results.sort(key=lambda x: x["참가클래스"])
+        if info:
+            empty_count = 0
+            is_new = rno not in participants_map
+            participants_map[rno] = info
+            print(f"  {'✔ 신규' if is_new else '✔ 갱신'} {rno}  {info['참가자명']}  {info['참가클래스']}", flush=True)
+            if is_new:
+                new_count += 1
+        else:
+            empty_count += 1
+            print(f"  . {rno}  (빈 결과 연속 {empty_count}건)", flush=True)
+            if empty_count >= EMPTY_LIMIT:
+                print(f"  연속 빈 결과 {EMPTY_LIMIT}건 → 조회 종료", flush=True)
+                break
 
-    # 클래스별 집계
+        time.sleep(DELAY_SEC)
+
+    # ── 전체 참가자 정렬 & 집계 ──────────────────────────
+    all_participants = sorted(
+        participants_map.values(),
+        key=lambda x: x["참가클래스"]
+    )
+
     class_count = {}
-    for r in results:
-        k = r["참가클래스"]
+    for p in all_participants:
+        k = p["참가클래스"]
         class_count[k] = class_count.get(k, 0) + 1
 
-    # data.json 저장
+    # ── data.json 저장 ────────────────────────────────────
     output = {
-        "updated_at":  date.today().isoformat(),
-        "total":       len(results),
-        "start_date":  START_DATE.isoformat(),
-        "end_date":    END_DATE.isoformat(),
-        "class_count": class_count,
-        "participants": results,
+        "updated_at":   today.isoformat(),
+        "total":        len(all_participants),
+        "start_date":   START_DATE.isoformat(),
+        "end_date":     today.isoformat(),
+        "class_count":  class_count,
+        "participants": all_participants,
     }
 
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"\n✅ 저장 완료 → {OUTPUT_FILE}  ({len(results)}명)")
+    print(f"\n✅ 저장 완료 → {OUTPUT_FILE}  (전체 {len(all_participants)}명 / 오늘 신규 {new_count}명)", flush=True)
 
 if __name__ == "__main__":
     main()
