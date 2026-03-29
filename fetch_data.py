@@ -6,7 +6,8 @@ GitHub Actions 에서 자동 실행됨
 
 import requests
 from bs4 import BeautifulSoup
-from datetime import date
+from datetime import date, timezone, timedelta
+KST = timezone(timedelta(hours=9))
 import json
 import time
 import os
@@ -93,7 +94,7 @@ def load_existing() -> dict:
 
 
 def main():
-    today = date.today()
+    today = datetime.now(KST).date()
 
     # 대회 시작 전이면 조회 불필요
     if today < START_DATE:
