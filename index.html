@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>타미야 RC카 대회 신청정보</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      padding: 20px;
+    }
+
+    header {
+      background: #c0392b;
+      color: white;
+      padding: 20px 24px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 { font-size: 1.4rem; }
+
+    .updated {
+      font-size: 0.8rem;
+      opacity: 0.85;
+      text-align: right;
+    }
+
+    .period {
+      font-size: 0.85rem;
+      opacity: 0.85;
+      margin-top: 4px;
+    }
+
+    /* 통계 카드 */
+    .stats {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 10px;
+      padding: 16px 20px;
+      flex: 1;
+      min-width: 140px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+
+    .stat-card .label {
+      font-size: 0.78rem;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    .stat-card .value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #c0392b;
+    }
+
+    .stat-card .sub {
+      font-size: 0.75rem;
+      color: #aaa;
+      margin-top: 2px;
+    }
+
+    /* 클래스별 통계 */
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .class-stats {
+      background: white;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .class-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .class-bar:last-child { margin-bottom: 0; }
+
+    .class-name {
+      min-width: 160px;
+      font-size: 0.85rem;
+    }
+
+    .bar-wrap {
+      flex: 1;
+      background: #f0f0f0;
+      border-radius: 4px;
+      height: 18px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: #c0392b;
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+
+    .class-count {
+      min-width: 36px;
+      text-align: right;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #c0392b;
+    }
+
+    /* 참가자 테이블 */
+    .table-wrap {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    /* 검색 */
+    #searchInput {
+      padding: 6px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+      width: 180px;
+    }
+
+    #searchInput:focus { border-color: #c0392b; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    thead th {
+      background: #fafafa;
+      padding: 10px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #666;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    thead th:hover { color: #c0392b; }
+
+    thead th.sorted { color: #c0392b; }
+
+    tbody tr:hover { background: #fef9f9; }
+
+    tbody td {
+      padding: 10px 16px;
+      border-bottom: 1px solid #f5f5f5;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      background: #fdecea;
+      color: #c0392b;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+
+    /* 새로고침 버튼 */
+    .refresh-btn {
+      background: none;
+      border: 1px solid rgba(255,255,255,0.6);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .refresh-btn:hover { background: rgba(255,255,255,0.15); }
+
+    @media (max-width: 600px) {
+      .class-name { min-width: 100px; font-size: 0.78rem; }
+      table { font-size: 0.8rem; }
+      #searchInput { width: 130px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🏁 타미야 RC카 대회 신청정보</h1>
+    <div class="period" id="period">기간 로딩 중...</div>
+  </div>
+  <div>
+    <button class="refresh-btn" onclick="loadData()">🔄 새로고침</button>
+    <div class="updated" id="updatedAt">갱신 시간 로딩 중...</div>
+  </div>
+</header>
+
+<!-- 통계 카드 -->
+<div class="stats">
+  <div class="stat-card">
+    <div class="label">총 참가자</div>
+    <div class="value" id="totalCount">-</div>
+    <div class="sub">명</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">참가 클래스 수</div>
+    <div class="value" id="classCount">-</div>
+    <div class="sub">개</div>
+  </div>
+</div>
+
+<!-- 클래스별 통계 -->
+<div class="class-stats">
+  <div class="section-title">📊 클래스별 인원</div>
+  <div id="classBars"></div>
+</div>
+
+<!-- 참가자 테이블 -->
+<div class="table-wrap">
+  <div class="table-header">
+    <div class="section-title" style="margin:0">👥 참가자 목록</div>
+    <input type="text" id="searchInput" placeholder="이름 또는 클래스 검색..." oninput="filterTable()">
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th onclick="sortTable('no')">#</th>
+        <th onclick="sortTable('접수번호')">접수번호 ↕</th>
+        <th onclick="sortTable('참가자명')">참가자명 ↕</th>
+        <th onclick="sortTable('참가클래스')">참가클래스 ↕</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<script>
+  let allData     = [];
+  let sortKey     = '참가클래스';
+  let sortAsc     = true;
+
+  async function loadData() {
+    try {
+      const res  = await fetch('data.json?t=' + Date.now());
+      const json = await res.json();
+
+      // 헤더 정보
+      document.getElementById('updatedAt').textContent =
+        '마지막 갱신: ' + json.updated_at;
+      document.getElementById('period').textContent =
+        '대회 기간: ' + json.start_date + ' ~ ' + json.end_date;
+      document.getElementById('totalCount').textContent = json.total;
+      document.getElementById('classCount').textContent =
+        Object.keys(json.class_count).length;
+
+      // 클래스별 바 차트
+      const maxVal = Math.max(...Object.values(json.class_count));
+      const bars   = Object.entries(json.class_count)
+        .sort((a, b) => b[1] - a[1])
+        .map(([name, cnt]) => `
+          <div class="class-bar">
+            <span class="class-name">${name}</span>
+            <div class="bar-wrap">
+              <div class="bar-fill" style="width:${(cnt/maxVal*100).toFixed(1)}%"></div>
+            </div>
+            <span class="class-count">${cnt}명</span>
+          </div>`).join('');
+      document.getElementById('classBars').innerHTML = bars;
+
+      allData = json.participants;
+      renderTable(allData);
+
+    } catch (e) {
+      document.getElementById('tableBody').innerHTML =
+        '<tr><td colspan="4" class="no-data">데이터를 불러올 수 없습니다.<br>' + e + '</td></tr>';
+    }
+  }
+
+  function renderTable(data) {
+    const tbody = document.getElementById('tableBody');
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="no-data">조회된 참가자가 없습니다.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map((r, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${r['접수번호']}</td>
+        <td>${r['참가자명']}</td>
+        <td><span class="badge">${r['참가클래스']}</span></td>
+      </tr>`).join('');
+  }
+
+  function filterTable() {
+    const q    = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = allData.filter(r =>
+      r['참가자명'].toLowerCase().includes(q) ||
+      r['참가클래스'].toLowerCase().includes(q) ||
+      r['접수번호'].includes(q)
+    );
+    renderTable(filtered);
+  }
+
+  function sortTable(key) {
+    if (sortKey === key) sortAsc = !sortAsc;
+    else { sortKey = key; sortAsc = true; }
+
+    if (key === 'no') {
+      renderTable(sortAsc ? [...allData] : [...allData].reverse());
+      return;
+    }
+    const sorted = [...allData].sort((a, b) => {
+      const va = a[key] || '';
+      const vb = b[key] || '';
+      return sortAsc ? va.localeCompare(vb, 'ko') : vb.localeCompare(va, 'ko');
+    });
+    renderTable(sorted);
+  }
+
+  // 초기 로드
+  loadData();
+</script>
+</body>
+</html>
