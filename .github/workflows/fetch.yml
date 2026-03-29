@@ -21,7 +21,7 @@ jobs:
         run: pip install requests beautifulsoup4
 
       - name: 데이터 조회
-        run: python fetch_data.py
+        run: python -u fetch_data.py
 
       - name: data.json 커밋 & 푸시
         run: |
