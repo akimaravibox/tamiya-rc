@@ -6,7 +6,7 @@ GitHub Actions 에서 자동 실행됨
 
 import requests
 from bs4 import BeautifulSoup
-from datetime import date, timezone, timedelta
+from datetime import date, datetime, timezone, timedelta
 KST = timezone(timedelta(hours=9))
 import json
 import time
