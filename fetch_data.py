@@ -12,7 +12,7 @@ import sys
 
 # ── 설정 ──────────────────────────────────────────────
 START_DATE  = date(2026, 3, 21)   # ← 대회 시작일
-END_DATE    = date(2026, 4, 15)   # ← 대회 종료일
+END_DATE    = date.today()   # ← 대회 종료일
 MAX_INDEX   = 50
 EMPTY_LIMIT = 20
 DELAY_SEC   = 0
