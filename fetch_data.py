@@ -1,13 +1,13 @@
 """
 타미야 RC카 대회 신청정보 조회 → data.json 저장
 GitHub Actions 에서 자동 실행됨
-- 오늘 날짜만 조회 후 기존 data.json 에 추가/갱신
+- 평상시: 오늘 날짜만 조회 후 기존 data.json 에 추가/갱신
+- 전체 재조회: FULL_REFRESH=true 환경변수 설정 시 시작일부터 전체 조회
 """
 
 import requests
 from bs4 import BeautifulSoup
 from datetime import date, datetime, timezone, timedelta
-KST         = timezone(timedelta(hours=9))
 import json
 import time
 import os
@@ -20,6 +20,7 @@ DELAY_SEC   = 0
 MAX_RETRY   = 3
 LOOKUP_URL  = "https://tamiya.co.kr/sub/mini_car_challenge_result.php"
 OUTPUT_FILE = "data.json"
+KST         = timezone(timedelta(hours=9))
 # ─────────────────────────────────────────────────────
 
 NO_DATA_KEYWORDS = ["신청정보가 없습니다", "조회된 내역이 없습니다", "결과가 없습니다"]
@@ -93,48 +94,64 @@ def load_existing() -> dict:
     }
 
 
+def fetch_range(start: date, end: date, participants_map: dict) -> int:
+    """start ~ end 날짜 범위를 조회해서 participants_map 에 머지. 신규 건수 반환"""
+    new_count = 0
+    current   = start
+
+    while current <= end:
+        print(f"\n[{current}] 조회 중...", flush=True)
+        empty_count = 0
+
+        for idx in range(1, MAX_INDEX + 1):
+            rno  = make_receipt_no(current, idx)
+            info = lookup(rno)
+
+            if info:
+                empty_count = 0
+                is_new = rno not in participants_map
+                participants_map[rno] = info
+                print(f"  {'✔ 신규' if is_new else '✔ 갱신'} {rno}  {info['참가자명']}  {info['참가클래스']}", flush=True)
+                if is_new:
+                    new_count += 1
+            else:
+                empty_count += 1
+                print(f"  . {rno}  (빈 결과 연속 {empty_count}건)", flush=True)
+                if empty_count >= EMPTY_LIMIT:
+                    print(f"  연속 빈 결과 {EMPTY_LIMIT}건 → 다음 날짜", flush=True)
+                    break
+
+            time.sleep(DELAY_SEC)
+
+        current += timedelta(days=1)
+
+    return new_count
+
+
 def main():
     today        = datetime.now(KST).date()
-    full_refresh = os.environ.get("FULL_REFRESH", "false").lower() == "true"  # ← 이 줄 추가
+    full_refresh = os.environ.get("FULL_REFRESH", "false").lower() == "true"
 
     # 대회 시작 전이면 조회 불필요
     if today < START_DATE:
         print(f"대회 시작 전입니다. (시작일: {START_DATE})")
         return
 
-    print(f"오늘 날짜 조회: {today}", flush=True)
-
     # ── 기존 data.json 로드 ──────────────────────────────
     existing = load_existing()
-
-    # 기존 참가자를 접수번호 기준으로 딕셔너리화 (중복 방지)
     participants_map = {
         p["접수번호"]: p for p in existing.get("participants", [])
     }
 
-    # ── 오늘 날짜만 조회 ─────────────────────────────────
-    new_count   = 0
-    empty_count = 0
-
-    for idx in range(1, MAX_INDEX + 1):
-        rno  = make_receipt_no(today, idx)
-        info = lookup(rno)
-
-        if info:
-            empty_count = 0
-            is_new = rno not in participants_map
-            participants_map[rno] = info
-            print(f"  {'✔ 신규' if is_new else '✔ 갱신'} {rno}  {info['참가자명']}  {info['참가클래스']}", flush=True)
-            if is_new:
-                new_count += 1
-        else:
-            empty_count += 1
-            print(f"  . {rno}  (빈 결과 연속 {empty_count}건)", flush=True)
-            if empty_count >= EMPTY_LIMIT:
-                print(f"  연속 빈 결과 {EMPTY_LIMIT}건 → 조회 종료", flush=True)
-                break
-
-        time.sleep(DELAY_SEC)
+    if full_refresh:
+        # 전체 재조회: 시작일 ~ 오늘
+        print(f"🔄 전체 재조회 모드: {START_DATE} ~ {today}", flush=True)
+        participants_map = {}  # 기존 데이터 초기화 후 전체 새로 조회
+        new_count = fetch_range(START_DATE, today, participants_map)
+    else:
+        # 오늘만 조회
+        print(f"오늘 날짜 조회: {today}", flush=True)
+        new_count = fetch_range(today, today, participants_map)
 
     # ── 전체 참가자 정렬 & 집계 ──────────────────────────
     all_participants = sorted(
@@ -160,7 +177,8 @@ def main():
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"\n✅ 저장 완료 → {OUTPUT_FILE}  (전체 {len(all_participants)}명 / 오늘 신규 {new_count}명)", flush=True)
+    mode = "전체 재조회" if full_refresh else "오늘 조회"
+    print(f"\n✅ [{mode}] 저장 완료 → {OUTPUT_FILE}  (전체 {len(all_participants)}명 / 신규 {new_count}명)", flush=True)
 
 if __name__ == "__main__":
     main()
