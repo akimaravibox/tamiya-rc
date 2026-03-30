@@ -93,7 +93,8 @@ def load_existing() -> dict:
 
 
 def main():
-    today = date.today()
+    today        = datetime.now(KST).date()
+    full_refresh = os.environ.get("FULL_REFRESH", "false").lower() == "true"  # ← 이 줄 추가
 
     # 대회 시작 전이면 조회 불필요
     if today < START_DATE:
