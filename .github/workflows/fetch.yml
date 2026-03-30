@@ -3,17 +3,26 @@ name: 신청정보 갱신
 on:
   schedule:
     - cron: '0 * * * *'   # 매 시간 정각 실행 (UTC 기준)
-  workflow_dispatch:        # 수동 실행 버튼도 추가
+  workflow_dispatch:        # 수동 실행
+    inputs:
+      full_refresh:
+        description: '전체 재조회 (시작일부터 오늘까지 전부 다시 조회)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
       - name: 코드 체크아웃
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Python 설치
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -21,6 +30,8 @@ jobs:
         run: pip install requests beautifulsoup4
 
       - name: 데이터 조회
+        env:
+          FULL_REFRESH: ${{ github.event.inputs.full_refresh || 'false' }}
         run: python -u fetch_data.py
 
       - name: data.json 커밋 & 푸시
@@ -28,5 +39,5 @@ jobs:
           git config user.name  "github-actions"
           git config user.email "github-actions@github.com"
           git add data.json
-          git diff --staged --quiet || git commit -m "데이터 갱신: $(date '+%Y-%m-%d %H:%M')"
+          git diff --staged --quiet || git commit -m "데이터 갱신: $(date '+%Y-%m-%d %H:%M') KST"
           git push
