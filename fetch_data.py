@@ -14,8 +14,8 @@ import os
 
 # ── 설정 ──────────────────────────────────────────────
 START_DATE  = date(2026, 3, 21)   # ← 대회 시작일 (고정)
-MAX_INDEX   = 50
-EMPTY_LIMIT = 20
+MAX_INDEX   = 300
+EMPTY_LIMIT = 200
 DELAY_SEC   = 0
 MAX_RETRY   = 3
 LOOKUP_URL  = "https://tamiya.co.kr/sub/mini_car_challenge_result.php"
