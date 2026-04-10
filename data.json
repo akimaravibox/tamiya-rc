@@ -1,6 +1,6 @@
 {
   "updated_at": "2026-04-10",
-  "total": 54,
+  "total": 55,
   "start_date": "2026-03-21",
   "end_date": "2026-04-10",
   "class_count": {
@@ -9,7 +9,7 @@
     "F-1": 4,
     "Jr. STOCK": 6,
     "M CHASSIS": 11,
-    "SUPER STOCK": 18
+    "SUPER STOCK": 19
   },
   "participants": [
     {
@@ -280,6 +280,11 @@
     {
       "접수번호": "2604090001",
       "참가자명": "김경수",
+      "참가클래스": "SUPER STOCK"
+    },
+    {
+      "접수번호": "2604100001",
+      "참가자명": "송호성",
       "참가클래스": "SUPER STOCK"
     }
   ]
