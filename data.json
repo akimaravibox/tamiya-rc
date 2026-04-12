@@ -1,6 +1,6 @@
 {
   "updated_at": "2026-04-12",
-  "total": 56,
+  "total": 57,
   "start_date": "2026-03-21",
   "end_date": "2026-04-12",
   "class_count": {
@@ -9,7 +9,7 @@
     "F-1": 4,
     "Jr. STOCK": 6,
     "M CHASSIS": 11,
-    "SUPER STOCK": 20
+    "SUPER STOCK": 21
   },
   "participants": [
     {
@@ -290,6 +290,11 @@
     {
       "접수번호": "2604120001",
       "참가자명": "조왕근",
+      "참가클래스": "SUPER STOCK"
+    },
+    {
+      "접수번호": "2604120002",
+      "참가자명": "원경재",
       "참가클래스": "SUPER STOCK"
     }
   ]
