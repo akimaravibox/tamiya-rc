@@ -1,14 +1,14 @@
 {
-  "updated_at": "2026-05-18",
-  "total": 28,
+  "updated_at": "2026-05-19",
+  "total": 29,
   "start_date": "2026-03-21",
-  "end_date": "2026-05-18",
+  "end_date": "2026-05-19",
   "class_count": {
     "4WD-GT": 4,
     "BBX": 3,
     "F-1": 5,
     "Jr. STOCK": 3,
-    "M CHASSIS": 5,
+    "M CHASSIS": 6,
     "SUPER STOCK": 8
   },
   "participants": [
@@ -110,6 +110,11 @@
     {
       "접수번호": "2605180028",
       "참가자명": "Paul Suen",
+      "참가클래스": "M CHASSIS"
+    },
+    {
+      "접수번호": "2605190001",
+      "참가자명": "서정윤",
       "참가클래스": "M CHASSIS"
     },
     {
