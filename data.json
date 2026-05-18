@@ -1,6 +1,6 @@
 {
   "updated_at": "2026-05-18",
-  "total": 27,
+  "total": 28,
   "start_date": "2026-03-21",
   "end_date": "2026-05-18",
   "class_count": {
@@ -8,7 +8,7 @@
     "BBX": 3,
     "F-1": 5,
     "Jr. STOCK": 3,
-    "M CHASSIS": 4,
+    "M CHASSIS": 5,
     "SUPER STOCK": 8
   },
   "participants": [
@@ -104,6 +104,11 @@
     },
     {
       "접수번호": "2605180027",
+      "참가자명": "Paul Suen",
+      "참가클래스": "M CHASSIS"
+    },
+    {
+      "접수번호": "2605180028",
       "참가자명": "Paul Suen",
       "참가클래스": "M CHASSIS"
     },
