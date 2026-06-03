@@ -13,7 +13,8 @@ import time
 import os
 
 # ── 설정 ──────────────────────────────────────────────
-START_DATE  = date(2026, 3, 21)   # ← 대회 시작일 (고정)
+START_DATE  = date(2026, 5, 18)   # ← 대회 시작일 (고정)
+END_DATE    = date(2026, 6, 11)   # ← 대회 종료일
 MAX_INDEX   = 300
 EMPTY_LIMIT = 200
 DELAY_SEC   = 0
@@ -111,7 +112,7 @@ def fetch_range(start: date, end: date, participants_map: dict) -> int:
                 empty_count = 0
                 is_new = rno not in participants_map
                 participants_map[rno] = info
-                print(f"  {'✔ 신규' if is_new else '✔ 갱신'} {rno}  {info['참가자명']}  {info['참가클래스']}", flush=True)
+                print(f"  {'[NEW]' if is_new else '[UPD]'} {rno}  {info['참가자명']}  {info['참가클래스']}", flush=True)
                 if is_new:
                     new_count += 1
             else:
@@ -132,6 +133,11 @@ def main():
     today        = datetime.now(KST).date()
     full_refresh = os.environ.get("FULL_REFRESH", "false").lower() == "true"
 
+ # 대회 종료일 이후면 조회 안 함  ← 이 부분 추가
+    if today > END_DATE:
+        print(f"접수 종료. (종료일: {END_DATE})")
+        return
+    
     # 대회 시작 전이면 조회 불필요
     if today < START_DATE:
         print(f"대회 시작 전입니다. (시작일: {START_DATE})")
@@ -145,7 +151,7 @@ def main():
 
     if full_refresh:
         # 전체 재조회: 시작일 ~ 오늘
-        print(f"🔄 전체 재조회 모드: {START_DATE} ~ {today}", flush=True)
+        print(f"전체 재조회 모드: {START_DATE} ~ {today}", flush=True)
         participants_map = {}  # 기존 데이터 초기화 후 전체 새로 조회
         new_count = fetch_range(START_DATE, today, participants_map)
     else:
@@ -178,7 +184,7 @@ def main():
         json.dump(output, f, ensure_ascii=False, indent=2)
 
     mode = "전체 재조회" if full_refresh else "오늘 조회"
-    print(f"\n✅ [{mode}] 저장 완료 → {OUTPUT_FILE}  (전체 {len(all_participants)}명 / 신규 {new_count}명)", flush=True)
+    print(f"\n[{mode}] 저장 완료 -> {OUTPUT_FILE}  (전체 {len(all_participants)}명 / 신규 {new_count}명)", flush=True)
 
 if __name__ == "__main__":
     main()
