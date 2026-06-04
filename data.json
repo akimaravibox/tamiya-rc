@@ -1,6 +1,6 @@
 {
   "updated_at": "2026-06-04",
-  "total": 42,
+  "total": 43,
   "start_date": "2026-05-18",
   "end_date": "2026-06-04",
   "class_count": {
@@ -8,7 +8,7 @@
     "BBX": 4,
     "F-1": 5,
     "Jr. STOCK": 4,
-    "M CHASSIS": 9,
+    "M CHASSIS": 10,
     "SUPER STOCK": 14
   },
   "participants": [
@@ -150,6 +150,11 @@
     {
       "접수번호": "2605260003",
       "참가자명": "구민형",
+      "참가클래스": "M CHASSIS"
+    },
+    {
+      "접수번호": "2606040001",
+      "참가자명": "김상원",
       "참가클래스": "M CHASSIS"
     },
     {
