@@ -1,6 +1,6 @@
 {
   "updated_at": "2026-06-08",
-  "total": 50,
+  "total": 51,
   "start_date": "2026-05-18",
   "end_date": "2026-06-08",
   "class_count": {
@@ -8,7 +8,7 @@
     "BBX": 4,
     "F-1": 6,
     "Jr. STOCK": 5,
-    "M CHASSIS": 12,
+    "M CHASSIS": 13,
     "SUPER STOCK": 17
   },
   "participants": [
@@ -175,6 +175,11 @@
     {
       "접수번호": "2606050005",
       "참가자명": "한경석",
+      "참가클래스": "M CHASSIS"
+    },
+    {
+      "접수번호": "2606080002",
+      "참가자명": "박재홍",
       "참가클래스": "M CHASSIS"
     },
     {
