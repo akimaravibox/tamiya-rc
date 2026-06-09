@@ -1,6 +1,6 @@
 {
   "updated_at": "2026-06-09",
-  "total": 53,
+  "total": 54,
   "start_date": "2026-05-18",
   "end_date": "2026-06-09",
   "class_count": {
@@ -9,7 +9,7 @@
     "F-1": 6,
     "Jr. STOCK": 6,
     "M CHASSIS": 13,
-    "SUPER STOCK": 17
+    "SUPER STOCK": 18
   },
   "participants": [
     {
@@ -275,6 +275,11 @@
     {
       "접수번호": "2606080001",
       "참가자명": "김대환",
+      "참가클래스": "SUPER STOCK"
+    },
+    {
+      "접수번호": "2606090003",
+      "참가자명": "조왕근",
       "참가클래스": "SUPER STOCK"
     }
   ]
